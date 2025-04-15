@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="LE CR - Gestion avancée de vos tâches professionnelles">
+    <title>LE CR - Gestion des tâches</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .task-completed { text-decoration: line-through; color: #9ca3af; }
+        .urgent { border-left: 4px solid #ef4444; }
+        .due-soon { border-left: 4px solid #f59e0b; }
+        .on-time { border-left: 4px solid #10b981; }
+        .priority-high { background-color: #fee2e2; color: #dc2626; }
+        .priority-medium { background-color: #fef3c7; color: #d97706; }
+        .priority-low { background-color: #dcfce7; color: #16a34a; }
+        .le-cr-title {
+            background: linear-gradient(90deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        <header class="mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div class="mb-4 md:mb-0">
+                        <h1 class="text-3xl font-bold le-cr-title mb-1">LE CR</h1>
+                        <p class="text-gray-600">Gestion avancée de vos tâches professionnelles</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="user-name" class="block text-sm font-medium text-gray-700 mb-1">Votre nom</label>
+                            <input type="text" id="user-name" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="user-profession" class="block text-sm font-medium text-gray-700 mb-1">Votre profession</label>
+                            <input type="text" id="user-profession" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Formulaire d'ajout -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-plus-circle text-indigo-500 mr-2"></i> Nouvelle tâche
+            </h2>
+            
+            <div class="mb-4">
+                <label for="task-input" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea id="task-input" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Décrivez votre tâche..."></textarea>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label for="due-date" class="block text-sm font-medium text-gray-700 mb-1">Échéance</label>
+                    <input type="date" id="due-date" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                
+                <div>
+                    <label for="task-priority" class="block text-sm font-medium text-gray-700 mb-1">Priorité</label>
+                    <select id="task-priority" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="low">Faible</option>
+                        <option value="medium" selected>Moyenne</option>
+                        <option value="high">Haute</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="task-category" class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                    <select id="task-category" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="work">Travail</option>
+                        <option value="personal">Personnel</option>
+                        <option value="meeting">Réunion</option>
+                        <option value="project">Projet</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button id="add-task-btn" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition flex items-center justify-center">
+                <i class="fas fa-plus-circle mr-2"></i> Ajouter
+            </button>
+        </div>
+        
+        <!-- Liste des tâches -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">
+                    <i class="fas fa-tasks mr-2 text-indigo-500"></i> Mes tâches
+                </h2>
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex items-center space-x-2">
+                        <span class="text-sm text-gray-500" id="total-count">0</span>
+                        <span class="text-sm">tâches</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-green-500" id="completed-count">0</span>
+                        <span class="text-sm hidden md:inline">terminées</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filtres -->
+            <div class="mb-6 bg-gray-50 p-3 rounded-lg">
+                <div class="flex flex-wrap gap-2">
+                    <button class="filter-btn px-3 py-1 text-xs rounded-full border border-gray-300 bg-white hover:bg-gray-100" data-filter="all">Toutes</button>
+                    <button class="filter-btn px-3 py-1 text-xs rounded-full border border-gray-300 bg-white hover:bg-gray-100" data-filter="pending">En cours</button>
+                    <button class="filter-btn px-3 py-1 text-xs rounded-full border border-gray-300 bg-white hover:bg-gray-100" data-filter="completed">Terminées</button>
+                    <button class="filter-btn px-3 py-1 text-xs rounded-full border border-gray-300 bg-white hover:bg-gray-100" data-filter="high">Haute priorité</button>
+                    <button class="filter-btn px-3 py-1 text-xs rounded-full border border-gray-300 bg-white hover:bg-gray-100" data-filter="overdue">En retard</button>
+                </div>
+            </div>
+            
+            <div id="tasks-list" class="space-y-3">
+                <div class="text-center py-8 text-gray-500" id="no-tasks-message">
+                    <i class="fas fa-clipboard-list text-4xl mb-3"></i>
+                    <p>Aucune tâche n'a été ajoutée</p>
+                    <p class="text-sm mt-2">Commencez par ajouter votre première tâche</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let tasks = [];
+            let currentFilter = 'all';
+            
+            // Éléments DOM
+            const taskInput = document.getElementById('task-input');
+            const dueDateInput = document.getElementById('due-date');
+            const prioritySelect = document.getElementById('task-priority');
+            const categorySelect = document.getElementById('task-category');
+            const addTaskBtn = document.getElementById('add-task-btn');
+            const resetTasksBtn = document.getElementById('reset-tasks-btn');
+            const tasksList = document.getElementById('tasks-list');
+            const noTasksMessage = document.getElementById('no-tasks-message');
+            
+            // Initialisation
+            initDatePicker();
+            fetchTasks();
+            
+            // Événements
+            addTaskBtn.addEventListener('click', addTask);
+            resetTasksBtn.addEventListener('click', resetTasks);
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', applyFilter);
+            });
+
+            function initDatePicker() {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                dueDateInput.min = new Date().toISOString().split('T')[0];
+                dueDateInput.value = tomorrow.toISOString().split('T')[0];
+            }
+
+            function fetchTasks() {
+                console.log("Tentative de récupération des tâches...");
+                fetch('http://localhost:3000/tasks')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Erreur réseau: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (!Array.isArray(data)) {
+                            throw new Error('Les données reçues ne sont pas valides');
+                        }
+                        tasks = data;
+                        updateTasksList();
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors de la récupération des tâches:", error);
+                        noTasksMessage.style.display = 'block';
+                        tasksList.innerHTML = `<p class="text-red-500">Impossible de récupérer les tâches. Veuillez réessayer plus tard.</p>`;
+                    });
+            }
+
+            function addTask() {
+                const taskText = taskInput.value.trim();
+                const dueDate = dueDateInput.value;
+                const priority = prioritySelect.value;
+                const category = categorySelect.value;
+
+                if (!taskText || !dueDate || !priority || !category) {
+                    return showError('Veuillez remplir tous les champs');
+                }
+
+                const newTask = {
+                    text: taskText,
+                    completed: false,
+                    dueDate,
+                    priority,
+                    category
+                };
+
+                fetch('http://localhost:3000/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newTask),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de l\'ajout de la tâche');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    tasks.push(data);
+                    updateTasksList();
+                    taskInput.value = '';
+                    taskInput.focus();
+                })
+                .catch(error => console.error("Erreur lors de l'ajout de la tâche:", error));
+            }
+
+            function updateTasksList() {
+                tasksList.innerHTML = '';
+                const filteredTasks = getFilteredTasks();
+                
+                if (filteredTasks.length === 0) {
+                    noTasksMessage.style.display = 'block';
+                } else {
+                    noTasksMessage.style.display = 'none';
+                    filteredTasks.forEach(task => {
+                        const taskElement = document.createElement('div');
+                        taskElement.innerHTML = createTaskHTML(task);
+                        tasksList.appendChild(taskElement.firstChild);
+                    });
+                }
+                
+                updateCounters();
+                initCheckboxListeners();
+            }
+
+            function createTaskHTML(task) {
+                const dueStatus = getDueStatus(task.dueDate);
+                return `
+                    <div class="task p-4 border rounded-lg ${task.completed ? 'bg-gray-50' : 'bg-white'} ${dueStatus}">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-start">
+                                <div class="flex items-center h-5 mr-3">
+                                    <input type="checkbox" data-id="${task._id}" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="${task.completed ? 'task-completed' : 'text-gray-700'}">
+                                            ${task.text}
+                                        <div class="mt-2 flex flex-wrap gap-2 items-center text-sm">
+                                            <span class="px-2 py-1 rounded-full priority-${task.priority}">
+                                                ${task.priority.toUpperCase()}
+                                            </span>
+                                            <span class="text-gray-500">
+                                                <i class="fas fa-calendar-day mr-1"></i>
+                                                ${formatDate(task.dueDate)}
+                                            </span>
+                                            <span class="text-gray-500">•</span>
+                                            <span class="text-gray-500">
+                                                <i class="fas fa-tag mr-1"></i>
+                                                ${task.category}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="deleteTask('${task._id}')" class="text-red-500 hover:text-red-700 transition">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            function initCheckboxListeners() {
+                document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const taskId = e.target.dataset.id;
+                        const task = tasks.find(t => t._id.toString() === taskId);
+                        if (task) {
+                            task.completed = e.target.checked;
+                            updateTask(task);
+                        }
+                    });
+                });
+            }
+
+            function applyFilter(e) {
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('bg-indigo-100', 'border-indigo-300');
+                });
+                e.target.classList.add('bg-indigo-100', 'border-indigo-300');
+                currentFilter = e.target.dataset.filter;
+                updateTasksList();
+            }
+            
+            function getFilteredTasks() {
+                const today = new Date();
+                return tasks.filter(task => {
+                    const dueDate = new Date(task.dueDate);
+                    const isOverdue = dueDate < today && !task.completed;
+                    
+                    switch(currentFilter) {
+                        case 'completed': return task.completed;
+                        case 'pending': return !task.completed;
+                        case 'high': return task.priority === 'high';
+                        case 'overdue': return isOverdue;
+                        default: return true;
+                    }
+                }).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+            }
+
+            function deleteTask(taskId) {
+                if (confirm('Voulez-vous vraiment supprimer cette tâche ?')) {
+                    fetch(`http://localhost:3000/tasks/${taskId}`, {
+                        method: 'DELETE',
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erreur lors de la suppression de la tâche');
+                        }
+                        tasks = tasks.filter(t => t._id !== taskId);
+                        updateTasksList();
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors de la suppression de la tâche:", error);
+                        showError('Impossible de supprimer la tâche. Veuillez réessayer.');
+                    });
+                }
+            }
+
+            function updateCounters() {
+                document.getElementById('total-count').textContent = tasks.length;
+                document.getElementById('completed-count').textContent = tasks.filter(t => t.completed).length;
+            }
+
+            function updateTask(task) {
+                fetch(`http://localhost:3000/tasks/${task._id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ completed: task.completed }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Task updated:", data);
+                })
+                .catch(error => console.error("Error updating task:", error));
+            }
+
+            function formatDate(dateString) {
+                const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                return new Date(dateString).toLocaleDateString('fr-FR', options);
+            }
+
+            function getDueStatus(dueDate) {
+                const today = new Date();
+                const due = new Date(dueDate);
+                const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+                
+                if (due < today) return 'urgent';
+                if (diffDays <= 3) return 'due-soon';
+                return 'on-time';
+            }
+
+            function showError(message) {
+                alert(message);
+            }
+        });
+    </script>
+</body>
+</html>
